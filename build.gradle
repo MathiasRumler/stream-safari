@@ -1,0 +1,50 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.0.1'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'mvp'
+version = '0.0.1-SNAPSHOT'
+description = 'streamy'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    // Centralized version management
+    springdocVersion = '3.0.1'
+    jjwtVersion = '0.12.6'
+    mapstructVersion = '1.6.3'
+    lombokVersion = '1.18.42'
+    lombokMapstructBindingVersion = '0.2.0'
+    hypersistenceVersion = '3.10.5'
+    commonsIoVersion = '2.18.0'
+    testcontainersVersion = '1.20.4'
+    archunitVersion = '1.4.0'
+}
+
+dependencies {
+
+
+    // Lombok (order matters: Lombok processor must come before MapStruct)
+
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    // Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-webmvc
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc:4.0.1'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
