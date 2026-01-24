@@ -77,7 +77,6 @@ public class StreamPipelineEngineService {
                         "Runtime",
                         "Thread"
                 );
-
         for (String token : forbidden) {
             if (pipeline.contains(token)) {
                 throw new IllegalArgumentException(

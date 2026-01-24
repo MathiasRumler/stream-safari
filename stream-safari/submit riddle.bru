@@ -1,0 +1,16 @@
+meta {
+  name: submit riddle
+  type: http
+  seq: 2
+}
+
+post {
+  url: POST http://localhost:8080/api/stream/submit
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

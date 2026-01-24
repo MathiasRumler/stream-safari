@@ -1,42 +1,38 @@
-# sv
+Your SvelteKit App Overview
+You have a basic SvelteKit application with two key files:
+What You Have
++page.svelte - Your homepage component
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Displays content (heading, links, paragraph)
+Imports and uses a Nested component
+The `<script>` tag contains TypeScript logic
 
-## Creating a project
+## +layout.svelte - Your app's wrapper/shell
 
-If you're seeing this, you've probably already done this step. Congrats!
+Wraps around all pages using {@render children()}
+Sets global styles (layout.css)
+Adds the favicon to the <head>
 
-```sh
-# create a new project
-npx sv create my-app
-```
+How SvelteKit Structure Works
+src/
+├── routes/
+│   ├── +layout.svelte          # Wraps all pages
+│   ├── +page.svelte            # Homepage (/)
+│   ├── about/
+│   │   └── +page.svelte        # About page (/about)
+│   └── blog/
+│       ├── +page.svelte        # Blog list (/blog)
+│       └── [slug]/
+│           └── +page.svelte    # Blog post (/blog/my-post)
+├── lib/
+│   ├── components/             # Reusable components
+│   └── assets/                 # Images, icons, etc.
+└── app.html                    # HTML template
+Key concepts:
 
-To recreate this project with the same configuration:
++page.svelte = a route/page
++layout.svelte = shared wrapper for pages
+File-based routing: folder structure = URL structure
+Reusable components go in lib/components/
 
-```sh
-# recreate this project
-npx sv create --template minimal --types ts --add prettier tailwindcss="plugins:typography" --install npm svelte-ui
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+Your app is currently showing a welcome page with Tailwind CSS (the text-red-500 class) and a nested component. You'd add new pages by creating new folders with +page.svelte files inside routes/.

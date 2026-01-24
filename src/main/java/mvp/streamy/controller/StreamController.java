@@ -1,10 +1,12 @@
 package mvp.streamy.controller;
 
 import lombok.AllArgsConstructor;
+import mvp.streamy.models.GameResult;
+import mvp.streamy.models.Riddle;
+import mvp.streamy.models.SubmitAnswerRequestDTO;
+import mvp.streamy.services.StreamGameService;
 import mvp.streamy.services.StreamPipelineEngineService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.List;
 public class StreamController {
 
     private final StreamPipelineEngineService streamPipelineEngineService;
+    private final StreamGameService streamGameService;
 
 
     @GetMapping("/")
@@ -36,5 +39,20 @@ public class StreamController {
 
         System.out.println(result);
         return "Test rocks";
+    }
+
+    @GetMapping("/riddles")
+    public List<Riddle> getRiddles() {
+        return streamGameService.getAllRiddles();
+    }
+
+    @PostMapping("/submit")
+    public GameResult submitAnswer(
+            @RequestBody SubmitAnswerRequestDTO request
+    ) {
+        return streamGameService.submitAnswer(
+                request.riddleId(),
+                request.pipeline()
+        );
     }
 }
