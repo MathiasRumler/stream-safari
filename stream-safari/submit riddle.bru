@@ -5,9 +5,16 @@ meta {
 }
 
 post {
-  url: POST http://localhost:8080/api/stream/submit
-  body: none
+  url: http://localhost:8080/api/stream/submit
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "riddleId": "7",
+    "pipeline": ".sorted()"
+  }
 }
 
 settings {

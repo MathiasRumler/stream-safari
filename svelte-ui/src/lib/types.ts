@@ -2,6 +2,12 @@
 export interface Riddle {
     id: string;
     description: string;
-    input: number[];
-    expectedOutput: number[];
+    input: any[];
+    expectedOutput: any[];
+}
+
+export interface SafariAnimel {
+     name: string;
+    height:number;
+     weight: number;
 }

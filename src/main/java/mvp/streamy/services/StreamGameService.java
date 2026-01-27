@@ -15,6 +15,7 @@ public class StreamGameService {
 
     private final RiddleRepository riddleRepository;
     private final StreamPipelineEngineService engine;
+    private final StreamPipelineEngineServiceV2 engine2;
 
     public List<Riddle> getAllRiddles() {
         return riddleRepository.findAll();
@@ -24,10 +25,10 @@ public class StreamGameService {
             String riddleId,
             String pipeline
     ) {
-        Riddle riddle = riddleRepository.findById(riddleId);
+        Riddle<?> riddle = riddleRepository.findById(riddleId);
 
-        List<Integer> result =
-                engine.execute(riddle.input(), pipeline);
+        List<?> result =
+                engine2.execute(riddle.input(), pipeline, riddle.dataType());
 
         boolean success =
                 result.equals(riddle.expectedOutput());
@@ -37,8 +38,9 @@ public class StreamGameService {
                         ? "Correct solution 🎉"
                         : "Incorrect result, try again";
 
-        return new GameResult(success, result, message);
+        return new GameResult<>(success, result, message);
     }
+
 
 //    private void validateAgainstRiddle(
 //            Riddle riddle,

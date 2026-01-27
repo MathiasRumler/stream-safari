@@ -2,9 +2,9 @@ package mvp.streamy.models;
 
 import java.util.List;
 
-public record GameResult (
+public record GameResult<T> (
         boolean success,
-        List<Integer>output,
+        List<T>output,
         String message
 ) {
 }

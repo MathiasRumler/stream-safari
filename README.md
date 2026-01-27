@@ -27,3 +27,10 @@ npm run dev
 
 zsh:
 ( cd svelte-ui && npm run dev )
+
+```
+### Learnings
+
+- compile and execute code during runtime
+- streams for the riddles
+- Generic Types

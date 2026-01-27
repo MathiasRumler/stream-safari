@@ -1,6 +1,7 @@
 package mvp.streamy.services;
 
 import lombok.extern.slf4j.Slf4j;
+import mvp.streamy.models.GameResult;
 import org.springframework.stereotype.Service;
 
 import javax.tools.*;
@@ -12,19 +13,22 @@ import java.util.*;
 
 @Service
 @Slf4j
-public class StreamPipelineEngineService {
+public class StreamPipelineEngineServiceV2 {
 
-    public List<Integer> execute(
-            List<Integer> input,
-            String pipeline
+    public <T> List<T> execute(
+            List<?> input,
+            String pipeline,
+            Class<T> elementType
     ) {
-
         validatePipeline(pipeline);
+
+        String typeImport = getTypeImport(elementType);
+        String typeName = elementType.getSimpleName();
 
         Map<String, String> sources = new HashMap<>();
         sources.put(
                 "demo.StreamProgram",
-                generateSource(pipeline)
+                generateSource(pipeline, typeImport, typeName)
         );
 
         CompilationResult result = compile(sources);
@@ -51,8 +55,8 @@ public class StreamPipelineEngineService {
                     programClass.getMethod("run", List.class);
 
             @SuppressWarnings("unchecked")
-            List<Integer> output =
-                    (List<Integer>) runMethod.invoke(null, input);
+            List<T> output =
+                    (List<T>) runMethod.invoke(null, input);
 
             return output;
 
@@ -61,8 +65,16 @@ public class StreamPipelineEngineService {
         }
     }
 
-    private void validatePipeline(String pipeline)  {
+    private String getTypeImport(Class<?> type) {
+        // Only add import if it's not in java.lang package
+        if (type.getPackage() != null &&
+                !type.getPackage().getName().equals("java.lang")) {
+            return "import " + type.getName() + ";\n";
+        }
+        return "";
+    }
 
+    private void validatePipeline(String pipeline) {
         Set<String> forbidden =
                 Set.of(
                         "parallel",
@@ -81,42 +93,31 @@ public class StreamPipelineEngineService {
                 );
             }
         }
-//        if (!pipeline.trim().startsWith(".stream()")) {
-//            throw new IllegalArgumentException(
-//                    "Pipeline must start with .stream()"
-//            );
-//        }
-//
-//        if (!pipeline.trim().endsWith("toList()")) {
-//            throw new IllegalArgumentException(
-//                    "Pipeline must end with toList()"
-//            );
-//        }
+                if (!pipeline.trim().startsWith(".")) {
+            throw new IllegalArgumentException(
+                    "Pipeline must start with a method call (.)"
+            );
+        }
     }
 
-    private String generateSource(String pipeline) {
-
-        return
-                """
-                package demo;
-
-                import java.util.List;
-
-                public class StreamProgram {
-
-                    public static List<Integer> run(List<Integer> input) {
-                        return input.stream()
-                """ +
-                        pipeline +
-                        """
-                                .toList();
-                            }
-                        }
-                        """;
+    private String generateSource(String pipeline, String typeImport, String typeName) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("package demo;\n\n");
+        sb.append("import java.util.List;\n");
+        sb.append(typeImport);
+        sb.append("\n");
+        sb.append("public class StreamProgram {\n\n");
+        sb.append("    public static List<").append(typeName).append("> run(List<").append(typeName).append("> input) {\n");
+        sb.append("        return input.stream()\n");
+        sb.append(pipeline);
+        sb.append("\n");
+        sb.append("                .toList();\n");
+        sb.append("    }\n");
+        sb.append("}\n");
+        return sb.toString();
     }
 
     private CompilationResult compile(Map<String, String> sources) {
-
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         if (compiler == null) {
             throw new IllegalStateException("Compiler not available");
@@ -156,6 +157,8 @@ public class StreamPipelineEngineService {
         );
     }
 
+
+
     private static class CompilationResult {
         final boolean success;
         final List<Diagnostic<? extends JavaFileObject>> diagnostics;
@@ -173,7 +176,6 @@ public class StreamPipelineEngineService {
     }
 
     private static class SourceCode extends SimpleJavaFileObject {
-
         private final String code;
 
         SourceCode(String className, String code) {
@@ -195,7 +197,6 @@ public class StreamPipelineEngineService {
     }
 
     private static class ByteCode extends SimpleJavaFileObject {
-
         private final ByteArrayOutputStream outputStream =
                 new ByteArrayOutputStream();
 
@@ -252,7 +253,6 @@ public class StreamPipelineEngineService {
     }
 
     private static class IsolatedClassLoader extends ClassLoader {
-
         private final Map<String, byte[]> classes;
 
         IsolatedClassLoader(
