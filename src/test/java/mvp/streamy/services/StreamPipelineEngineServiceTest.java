@@ -1,112 +1,146 @@
 package mvp.streamy.services;
 
 
+import mvp.streamy.Repository.RiddleRepository;
+import mvp.streamy.models.ResultValue;
+import mvp.streamy.models.Riddle;
 import mvp.streamy.models.SafariAnimal;
+import mvp.streamy.services.ResultValueFactory;
+import mvp.streamy.services.StreamPipelineEngineServiceV2;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+class StreamPipelineEngineServiceTest {
 
-class StreamPipelineEngineTest {
+    private StreamPipelineEngineServiceV2 engine;
+    private RiddleRepository riddleRepository;
+    private mvp.streamy.services.ResultValueFactory resultValueFactory;
 
-    private final StreamPipelineEngineService engine =
-            new StreamPipelineEngineService();
-    private final StreamPipelineEngineServiceV2 engine2 =
-            new StreamPipelineEngineServiceV2();
+    @BeforeEach
+    void setup() {
+        engine = new StreamPipelineEngineServiceV2();
+        riddleRepository = new RiddleRepository();
+    }
 
     @Test
-    void shouldSortAndDistinctListUsingStreamPipeline() throws ClassNotFoundException {
+    void riddle1_orderAnimalsByAge() {
+        Riddle riddle = riddleRepository.findById("1");
 
-        List<Integer> input =
-                List.of(5, 2, 9, 1, 2, 5);
+        String pipeline = """
+                .sorted(Comparator.comparing(SafariAnimal::age))
+                .toList()
+                """;
 
-        String pipeline =
-                """
+        Object rawResult =
+                engine.execute(riddle.input(), pipeline, SafariAnimal.class);
+
+        ResultValue actual =
+                ResultValueFactory.from(rawResult);
+
+        assertEquals(riddle.expectedOutput(), actual.value());
+    }
+
+    @Test
+    void riddle2_removeDuplicates() {
+        Riddle riddle = riddleRepository.findById("2");
+
+        String pipeline = """
                 .distinct()
-                .sorted()
+                .toList()
                 """;
 
-        List<Integer> result =
-                engine.execute(input, pipeline);
-        List<Integer> result3 = engine2.execute(
-                Arrays.asList(1, 2, 3, 4, 5),
-                ".filter(n -> n > 2).map(n -> n * 2)",
-                Integer.class
-        );
-        // For strings
-        List<String> words = engine2.execute(
-                Arrays.asList("hello", "world", "java"),
-                ".filter(s -> s.length() > 4).map(String::toUpperCase)",
-                String.class
-        );
-//        List<GameResult> lost = new ArrayList<>();
-//        lost.add(new GameResult(true, null, null));
-//        List<GameResult> gameList = engine2.execute(lost,".sorted()", GameResult.class);
+        Object rawResult =
+                engine.execute(riddle.input(), pipeline, SafariAnimal.class);
 
-        assertEquals(List.of("HELLO", "WORLD"),words);
+        ResultValue actual =
+                ResultValueFactory.from(rawResult);
 
-        assertEquals(
-                List.of(1, 2, 5, 9),
-                result
-        );
-
-        List<SafariAnimal> resultAnimals = engine2.execute(
-                Arrays.asList(
-                        new SafariAnimal("Lion",120,400),
-                        new SafariAnimal("Knuu",120,400),
-                        new SafariAnimal("Giraffe",120,400)
-                ), ".map(e->e)",SafariAnimal.class);
-
+        assertEquals(riddle.expectedOutput(), actual.value());
     }
 
     @Test
-    void hack() {
+    void riddle4_findHeaviestAnimal() {
+        Riddle riddle = riddleRepository.findById("4");
 
-        List<Integer> input =
-                List.of(5, 2, 9, 1, 2, 5);
-
-        String overflowPiepline =
-                """
-                .map(a->a*313213132131231312312312)
-                .sorted()
+        String pipeline = """
+                .max(Comparator.comparing(SafariAnimal::weight))
+                .orElseThrow()
                 """;
 
-        IllegalArgumentException exception =
-                assertThrows(
-                        IllegalArgumentException.class,
-                        () -> engine.execute(input, overflowPiepline)
-                );
+        Object rawResult =
+                engine.execute(riddle.input(), pipeline, SafariAnimal.class);
 
-        assertTrue(
-                exception.getMessage().contains("integer number too large"),
-                "Expected validation error for forbidden pipeline"
-        );
+        ResultValue actual =
+                ResultValueFactory.from(rawResult);
+
+        assertEquals(riddle.expectedOutput(), actual.value());
     }
 
     @Test
-    void shouldRejectForbiddenOperationsInPipeline() {
+    void riddle5_uppercaseAnimalNames() {
+        Riddle riddle = riddleRepository.findById("5");
 
-        List<Integer> input =
-                List.of(1, 2, 3);
-
-        String invalidPipeline =
-                """
-                .peek(System.out::println)
+        String pipeline = """
+                .map(a -> a.name().toUpperCase())
+                .toList()
                 """;
 
-        IllegalArgumentException exception =
-                assertThrows(
-                        IllegalArgumentException.class,
-                        () -> engine.execute(input, invalidPipeline)
-                );
+        Object rawResult =
+                engine.execute(riddle.input(), pipeline, SafariAnimal.class);
 
-        assertTrue(
-                exception.getMessage().contains("Forbidden construct"),
-                "Expected validation error for forbidden pipeline"
-        );
+        ResultValue actual =
+                ResultValueFactory.from(rawResult);
+
+        assertEquals(riddle.expectedOutput(), actual.value());
     }
 
+    @Test
+    void riddle6_findPredators() {
+        Riddle riddle = riddleRepository.findById("6");
+
+        String pipeline = """
+                .filter(SafariAnimal::predator)
+                .toList()
+                """;
+
+        Object rawResult =
+                engine.execute(riddle.input(), pipeline, SafariAnimal.class);
+
+        ResultValue actual =
+                ResultValueFactory.from(rawResult);
+
+        assertEquals(riddle.expectedOutput(), actual.value());
+    }
+
+    @Test
+    void riddle7_heaviestAnimalPerSpecies() {
+        Riddle riddle = riddleRepository.findById("7");
+
+        String pipeline = """
+                .collect(
+                    Collectors.groupingBy(
+                        SafariAnimal::species,
+                        Collectors.collectingAndThen(
+                            Collectors.maxBy(
+                                Comparator.comparing(SafariAnimal::weight)
+                            ),
+                            Optional::get
+                        )
+                    )
+                )
+                """;
+
+        Object rawResult =
+                engine.execute(riddle.input(), pipeline, SafariAnimal.class);
+
+        ResultValue actual =
+                ResultValueFactory.from(rawResult);
+
+        assertEquals(riddle.expectedOutput(), actual.value());
+    }
 }

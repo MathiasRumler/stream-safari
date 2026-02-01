@@ -1,13 +1,14 @@
 // src/lib/types.ts
+export interface SafariAnimal {
+    name: string;
+    height: number;
+    weight: number;
+}
+
 export interface Riddle {
     id: string;
     description: string;
-    input: any[];
-    expectedOutput: any[];
-}
-
-export interface SafariAnimel {
-     name: string;
-    height:number;
-     weight: number;
+    dataType: string;
+    input: string[] | SafariAnimal[];
+    expectedOutput: string[] | SafariAnimal[];
 }

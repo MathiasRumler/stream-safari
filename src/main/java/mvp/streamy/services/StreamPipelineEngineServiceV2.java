@@ -1,7 +1,6 @@
 package mvp.streamy.services;
 
 import lombok.extern.slf4j.Slf4j;
-import mvp.streamy.models.GameResult;
 import org.springframework.stereotype.Service;
 
 import javax.tools.*;
@@ -15,7 +14,7 @@ import java.util.*;
 @Slf4j
 public class StreamPipelineEngineServiceV2 {
 
-    public <T> List<T> execute(
+    public <T> Object execute(
             List<?> input,
             String pipeline,
             Class<T> elementType
@@ -55,8 +54,8 @@ public class StreamPipelineEngineServiceV2 {
                     programClass.getMethod("run", List.class);
 
             @SuppressWarnings("unchecked")
-            List<T> output =
-                    (List<T>) runMethod.invoke(null, input);
+            Object output =
+                     runMethod.invoke(null, input);
 
             return output;
 
@@ -80,7 +79,6 @@ public class StreamPipelineEngineServiceV2 {
                         "parallel",
                         "forEach",
                         "peek",
-                        "collect(",
                         "new ",
                         "System",
                         "Runtime",
@@ -104,14 +102,17 @@ public class StreamPipelineEngineServiceV2 {
         StringBuilder sb = new StringBuilder();
         sb.append("package demo;\n\n");
         sb.append("import java.util.List;\n");
+        sb.append("import java.util.stream.Collectors;\n");
+        sb.append("import java.util.Optional;\n");
+        sb.append("import java.util.Comparator;\n");
         sb.append(typeImport);
         sb.append("\n");
         sb.append("public class StreamProgram {\n\n");
-        sb.append("    public static List<").append(typeName).append("> run(List<").append(typeName).append("> input) {\n");
+        sb.append("    public static Object run(List<").append(typeName).append("> input) {\n");
         sb.append("        return input.stream()\n");
         sb.append(pipeline);
         sb.append("\n");
-        sb.append("                .toList();\n");
+        sb.append("                ;\n");
         sb.append("    }\n");
         sb.append("}\n");
         return sb.toString();

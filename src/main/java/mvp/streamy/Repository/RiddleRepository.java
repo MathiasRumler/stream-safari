@@ -6,76 +6,71 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Arrays;
 
 @Repository
 public class RiddleRepository {
 
-    /**
-     * Todo Replace
-     Class<?> surly = Class.forName("java.lang.Integer");
-
-     */
-    private final Map<String, Riddle<?>> riddles =
+    private final Map<String, Riddle> riddles =
             Map.of(
-                    "1", new Riddle<>(
+                    "1", new Riddle(
                             "1",
-                            "Sort the list in ascending order",
-                            Integer.class,
-                            Arrays.asList(5, 3, 1, 4, 2),
-                            Arrays.asList(1, 2, 3, 4, 5)
-                    ),
-                    "2", new Riddle<>(
-                            "2",
-                            "Remove duplicates and sort",
-                            Integer.class,
-                            Arrays.asList(3, 1, 2, 3, 1),
-                            Arrays.asList(1, 2, 3)
-                    ),
-                    "3", new Riddle<>(
-                            "3",
-                            "Double Values",
-                            Integer.class,
-                            Arrays.asList(3, 1, 2, 3, 1),
-                            Arrays.asList(6, 2, 4 , 6, 2)
-                    ),
-                    "4", new Riddle<>(
-                            "4",
-                            "Find Max",
-                            Integer.class,
-                            Arrays.asList(1, 17, 54, 14, 14, 33, 45, -11),
-                            Arrays.asList(54)
-                    ),
-                    "5", new Riddle<>(
-                            "5",
-                            "Uppercase",
-                            String.class,
-                            Arrays.asList("hello", "world", "java"),
-                            Arrays.asList("HELLO", "WORLD")
-
-                    ),
-                    "6", new Riddle<>(
-                            "6",
-                            "Find the b's",
-                            String.class,
-                            Arrays.asList("hello", "bello", "jello","bob"),
-                            Arrays.asList("bello", "bob")
-
-                    )
-                    ,
-                    "7", new Riddle<>(
-                            "7",
-                            "Find the same animals",
+                            "Order animals by age (youngest first)",
                             SafariAnimal.class,
-                            Arrays.asList(
-                                    new SafariAnimal("Lion",120,400),
-                                    new SafariAnimal("Knuu",120,400),
-                                    new SafariAnimal("Giraffe",120,400)
-                            ),
-                            Arrays.asList(
-                                    new SafariAnimal("Lion",120,400),
-                                    new SafariAnimal("Knuu",120,400),
-                                    new SafariAnimal("Giraffe",120,400)
+                            SafariScenarios.BASE,
+                            List.of(
+                                    new SafariAnimal("Hyena", "MAMMAL", 8, 60, true),
+                                    new SafariAnimal("Zebra", "MAMMAL", 10, 300, false),
+                                    new SafariAnimal("Lion", "MAMMAL", 12, 190, true),
+                                    new SafariAnimal("Giraffe", "MAMMAL", 15, 800, false),
+                                    new SafariAnimal("Elephant", "MAMMAL", 25, 6000, false)
+                            )
+                    ),
+                    "2", new Riddle(
+                            "2",
+                            "Remove duplicate animals",
+                            SafariAnimal.class,
+                            SafariScenarios.WITH_DUPLICATES,
+                            List.of(
+                                    SafariScenarios.BASE.get(0),
+                                    SafariScenarios.BASE.get(1),
+                                    SafariScenarios.BASE.get(3)
+                            )
+                    ),
+
+                    "4", new Riddle(
+                            "4",
+                            "Find the heaviest animal",
+                            SafariAnimal.class,
+                            SafariScenarios.BASE,
+                            new SafariAnimal("Elephant", "MAMMAL", 25, 6000, false)
+                    ),
+                    "5", new Riddle(
+                            "5",
+                            "Get all animal names in uppercase",
+                            SafariAnimal.class,
+                            SafariScenarios.BASE,
+                            List.of("LION", "ELEPHANT", "GIRAFFE", "HYENA", "ZEBRA")
+                    ),
+                    "6", new Riddle(
+                            "6",
+                            "Find all predators",
+                            SafariAnimal.class,
+                            SafariScenarios.BASE,
+                            List.of(
+                                    SafariScenarios.BASE.get(0),
+                                    SafariScenarios.BASE.get(3)
+                            )
+                    ),
+                    "7", new Riddle(
+                            "7",
+                            "Find the heaviest animal per species",
+                            SafariAnimal.class,
+                            SafariScenarios.MIXED_SPECIES,
+                            Map.of(
+                                    "MAMMAL",
+                                    new SafariAnimal("Elephant", "MAMMAL", 25, 6000, false),
+                                    "REPTILE",
+                                    new SafariAnimal("Crocodile", "REPTILE", 40, 500, true)
                             )
                     )
             );

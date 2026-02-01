@@ -2,13 +2,13 @@ package mvp.streamy.models;
 
 import java.util.List;
 
-public record Riddle<T>(
+public record Riddle(
 
         String id,
         String description,
         Class<?> dataType,
-        List<T>input,
-        List<T> expectedOutput
+        List<SafariAnimal>input,
+        Object expectedOutput
 
 //        Set<String> allowedOperations,
 //        Set<String>forbiddenOperations

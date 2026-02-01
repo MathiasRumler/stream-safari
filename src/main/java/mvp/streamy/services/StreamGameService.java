@@ -2,9 +2,9 @@ package mvp.streamy.services;
 
 import lombok.AllArgsConstructor;
 import mvp.streamy.Repository.RiddleRepository;
-import mvp.streamy.models.GameResult;
+import mvp.streamy.models.RiddleResult;
+import mvp.streamy.models.ResultValue;
 import mvp.streamy.models.Riddle;
-import mvp.streamy.services.StreamPipelineEngineService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,38 +21,31 @@ public class StreamGameService {
         return riddleRepository.findAll();
     }
 
-    public GameResult submitAnswer(
+    public RiddleResult submitAnswer(
             String riddleId,
             String pipeline
     ) {
-        Riddle<?> riddle = riddleRepository.findById(riddleId);
+        Riddle riddle = riddleRepository.findById(riddleId);
 
-        List<?> result =
+        Object rawActual =
                 engine2.execute(riddle.input(), pipeline, riddle.dataType());
 
+        ResultValue actual =
+                ResultValueFactory.from(rawActual);
+
+        ResultValue expected =
+                ResultValueFactory.from(riddle.expectedOutput());
+
         boolean success =
-                result.equals(riddle.expectedOutput());
+                actual.equals(expected);
 
         String message =
                 success
                         ? "Correct solution 🎉"
                         : "Incorrect result, try again";
 
-        return new GameResult<>(success, result, message);
+        return new RiddleResult(success, actual, message);
     }
 
 
-//    private void validateAgainstRiddle(
-//            Riddle riddle,
-//            String pipeline
-//    ) {
-//        for (String forbidden : riddle.forbiddenOperations()) {
-//            if (pipeline.contains(forbidden)) {
-//                throw new IllegalArgumentException(
-//                        "This riddle forbids using " + forbidden
-//                );
-//            }
-//        }
-//
-//    }
 }
