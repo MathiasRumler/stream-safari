@@ -77,22 +77,32 @@ class StreamPipelineEngineServiceTest {
   }
 
   @Test
-  void riddle5_uppercaseAnimalNames() {
-    Riddle riddle = riddleRepository.findById("5");
+  void riddle5_sumAnimalWeights() {
+
+    Riddle riddle =
+        riddleRepository.findById("5");
 
     String pipeline = """
-        .map(a -> a.name().toUpperCase())
-        .toList()
+        .mapToInt(SafariAnimal::weight)
+        .sum()
         """;
 
     Object rawResult =
-        engine.execute(riddle.input(), pipeline, SafariAnimal.class);
+        engine.execute(
+            riddle.input(),
+            pipeline,
+            SafariAnimal.class
+        );
 
     ResultValue actual =
         ResultValueFactory.from(rawResult);
 
-    assertEquals(riddle.expectedOutput(), actual.value());
+    assertEquals(
+        riddle.expectedOutput(),
+        actual.value()
+    );
   }
+
 
   @Test
   void riddle6_findPredators() {

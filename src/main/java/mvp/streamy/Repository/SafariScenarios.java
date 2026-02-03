@@ -37,6 +37,10 @@ public final class SafariScenarios {
         .toList();
   }
 
+  public static int sumAnimalWeight() {
+    return BASE_ANIMALS.stream().mapToInt(SafariAnimal::weight).sum();
+  }
+
   public static List<SafariAnimal> orderedByAge() {
     return BASE_ANIMALS.stream()
         .sorted(Comparator.comparing(SafariAnimal::age))

@@ -37,10 +37,10 @@ public class RiddleRepository {
 
       "5", new Riddle(
           "5",
-          "Get all animal names in uppercase",
+          "Get the weight of all animals combined",
           SafariAnimal.class,
           SafariScenarios.BASE_ANIMALS,
-          SafariScenarios.uppercase()
+          SafariScenarios.sumAnimalWeight()
       ),
 
       "6", new Riddle(
