@@ -99,24 +99,26 @@ public class StreamPipelineEngineServiceV2 {
     }
 
     private String generateSource(String pipeline, String typeImport, String typeName) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("package demo;\n\n");
-        sb.append("import java.util.List;\n");
-        sb.append("import java.util.stream.Collectors;\n");
-        sb.append("import java.util.Optional;\n");
-        sb.append("import java.util.Comparator;\n");
-        sb.append(typeImport);
-        sb.append("\n");
-        sb.append("public class StreamProgram {\n\n");
-        sb.append("    public static Object run(List<").append(typeName).append("> input) {\n");
-        sb.append("        return input.stream()\n");
-        sb.append(pipeline);
-        sb.append("\n");
-        sb.append("                ;\n");
-        sb.append("    }\n");
-        sb.append("}\n");
-        return sb.toString();
+        return """
+            package demo;
+
+            import java.util.List;
+            import java.util.stream.Collectors;
+            import java.util.Optional;
+            import java.util.Comparator;
+            %s
+
+            public class StreamProgram {
+
+                public static Object run(List<%s> input) {
+                    return input.stream()
+                            %s
+                            ;
+                }
+            }
+            """.formatted(typeImport, typeName, pipeline);
     }
+
 
     private CompilationResult compile(Map<String, String> sources) {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();

@@ -1,12 +1,11 @@
 package mvp.streamy.models;
 
-public record SafariAnimal (
+public record SafariAnimal(
         String name,
-        String species,
+        AnimalSpecies species,
+        AnimalClass animalClass,
         int age,
         int weight,
         boolean predator
-){
-
-
+) {
 }

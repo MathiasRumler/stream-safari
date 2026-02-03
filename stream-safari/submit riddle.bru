@@ -12,8 +12,8 @@ post {
 
 body:json {
   {
-    "riddleId": "7",
-    "pipeline": ".sorted()"
+    "riddleId": "4",
+    "pipeline": ".max(java.util.Comparator.comparing(SafariAnimal::weight))                .orElseThrow()"
   }
 }
 

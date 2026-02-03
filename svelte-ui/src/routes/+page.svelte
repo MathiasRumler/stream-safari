@@ -50,17 +50,17 @@
                         </svg>
                     </div>
                     <h2 class="text-xl font-semibold mb-3 text-gray-800">{riddle.description}</h2>
-                    {#if riddle.dataType === 'mvp.streamy.models.SafariAnimal'}
-                        {#each riddle.input as animal}
-                            <p>{animal.name}</p>
-                        {/each}
+                    <!--{#if riddle.dataType === 'mvp.streamy.models.SafariAnimal'}-->
+                    <!--    {#each riddle.input as animal}-->
+                    <!--        <p>{animal.name}</p>-->
+                    <!--    {/each}-->
 
-                    {:else}
-                        <div class="text-sm text-gray-600">
-                            <p class="mb-1">Input: [{riddle.input.join(', ')}]</p>
-                            <p>Output: [{riddle.expectedOutput.join(', ')}]</p>
-                        </div>
-                    {/if}
+                    <!--{:else}-->
+                    <!--    <div class="text-sm text-gray-600">-->
+                    <!--        <p class="mb-1">Input: [{riddle.input.join(', ')}]</p>-->
+                    <!--        <p>Output: [{riddle.expectedOutput.join(', ')}]</p>-->
+                    <!--    </div>-->
+                    <!--{/if}-->
 
                 </a>
             {/each}

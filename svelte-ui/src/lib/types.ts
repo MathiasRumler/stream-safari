@@ -9,6 +9,6 @@ export interface Riddle {
     id: string;
     description: string;
     dataType: string;
-    input: string[] | SafariAnimal[];
-    expectedOutput: string[] | SafariAnimal[];
+    input:  SafariAnimal[];
+    expectedOutput: any;
 }

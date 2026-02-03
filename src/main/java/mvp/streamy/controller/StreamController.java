@@ -22,8 +22,8 @@ public class StreamController {
 
 
     @GetMapping("/riddles")
-    public List<Riddle> getRiddles() {
-        return streamGameService.getAllRiddles();
+    public ResponseEntity<List<Riddle>> getRiddles() {
+        return new ResponseEntity<>(streamGameService.getAllRiddles(), HttpStatus.OK);
     }
 
     @PostMapping("/submit")
