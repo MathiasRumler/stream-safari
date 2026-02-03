@@ -19,6 +19,7 @@
             const riddles: Riddle[] = await response.json();
             riddle = riddles.find(r => r.id === id) || null;
             if (!riddle) throw new Error('Riddle not found');
+            console.log(riddle)
         } catch (err) {
             error = err instanceof Error ? err.message : 'Unknown error';
         } finally {
@@ -32,6 +33,16 @@
             fetchRiddle(data.id);
         }
     });
+    const speciesIcons: Record<string, string> = {
+      LION: '🦁',
+      ELEPHANT: '🐘',
+      GIRAFFE: '🦒',
+      ZEBRA: '🦓',
+      HYENA: '🐕',
+      CROCODILE: '🐊',
+      SNAKE: '🐍',
+      LIZARD: '🦎'
+    };
 
     async function submitSolution() {
         if (!riddle || !pipeline.trim()) return;
@@ -105,17 +116,31 @@
 
             <h1 class="text-3xl font-bold mb-6 text-gray-800">{riddle.description}</h1>
 
-            <div class="space-y-4">
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <h2 class="text-lg font-semibold mb-2 text-gray-700">Input:</h2>
-                    <code class="text-gray-800">[{riddle.input.join(', ')}]</code>
-                </div>
+          <div class="bg-gray-50 p-6 rounded-xl border-2 border-gray-200">
+            <h2 class="text-lg font-semibold mb-4 text-gray-700">Safari Herd:</h2>
+            <div class="flex flex-wrap gap-4">
+              {#each riddle.input as animal}
+                <div class="group relative flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-sm border border-gray-200 hover:border-blue-500 hover:scale-110 transition-all cursor-help">
+                <span class="text-3xl" role="img" aria-label={animal.species}>
+                    {speciesIcons[animal.species] || '🐾'}
+                </span>
 
-                <div class="bg-green-50 p-4 rounded-lg">
-                    <h2 class="text-lg font-semibold mb-2 text-gray-700">Expected Output:</h2>
-                    <code class="text-gray-800">[{riddle.expectedOutput.join(', ')}]</code>
+                  <div class="absolute bottom-full mb-2 hidden group-hover:block z-50 w-48 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-xl">
+                    <div class="font-bold border-b border-gray-700 pb-1 mb-1 text-blue-400">
+                      {animal.name} ({animal.species})
+                    </div>
+                    <ul class="space-y-1">
+                      <li>Class: {animal.animalClass}</li>
+                      <li>Age: {animal.age} years</li>
+                      <li>Weight: {animal.weight}kg</li>
+                      <li>Type: {animal.predator ? '🔴 Predator' : '🟢 Prey'}</li>
+                    </ul>
+                    <div class="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-gray-900"></div>
+                  </div>
                 </div>
+              {/each}
             </div>
+          </div>
 
             <div class="mt-8">
                 <h2 class="text-lg font-semibold mb-3 text-gray-700">Your Solution:</h2>

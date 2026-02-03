@@ -10,7 +10,5 @@ public record Riddle(
         List<SafariAnimal>input,
         Object expectedOutput
 
-//        Set<String> allowedOperations,
-//        Set<String>forbiddenOperations
 ) {
 }
