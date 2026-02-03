@@ -57,6 +57,13 @@ public class RiddleRepository {
           SafariAnimal.class,
           SafariScenarios.BASE_ANIMALS,
           SafariScenarios.heaviestPerSpecies()
+      ),
+      "8", new Riddle(
+          "8",
+          "Group animals into weight ranges: 0-200, 200-500, 500-1000, 1000+",
+          SafariAnimal.class,
+          SafariScenarios.BASE_ANIMALS,
+          SafariScenarios.groupAnimalsByWeightRange()
       )
   );
 

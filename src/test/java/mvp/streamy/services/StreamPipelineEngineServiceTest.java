@@ -148,4 +148,37 @@ class StreamPipelineEngineServiceTest {
 
     assertEquals(riddle.expectedOutput(), actual.value());
   }
+
+  @Test
+  void riddle8_groupAnimalsByWeightRange() {
+
+    Riddle riddle =
+        riddleRepository.findById("8");
+
+    String pipeline = """
+        .collect(Collectors.groupingBy(a -> {
+            int w = a.weight();
+            if (w <= 200) return "0-200";
+            if (w <= 500) return "200-500";
+            if (w <= 1000) return "500-1000";
+            return "1000+";
+        }))
+        """;
+
+    Object rawResult =
+        engine.execute(
+            riddle.input(),
+            pipeline,
+            SafariAnimal.class
+        );
+
+    ResultValue actual =
+        ResultValueFactory.from(rawResult);
+
+    assertEquals(
+        riddle.expectedOutput(),
+        actual.value()
+    );
+  }
+
 }

@@ -78,6 +78,16 @@ public final class SafariScenarios {
         );
   }
 
+  public static Map<String, List<SafariAnimal>> groupAnimalsByWeightRange() {
+     return BASE_ANIMALS.stream().collect(Collectors.groupingBy(a -> {
+      int w = a.weight();
+      if (w <= 200) return "0-200";
+      if (w <= 500) return "200-500";
+      if (w <= 1000) return "500-1000";
+      return "1000+";
+    }));
+  }
+
 
   /**
    * Dataset with duplicates
@@ -90,41 +100,4 @@ public final class SafariScenarios {
       BASE_ANIMALS.get(3)
   );
 
-  /**
-   * Mixed species for grouping riddles
-   */
-  public static final List<SafariAnimal> MIXED_SPECIES = List.of(
-      new SafariAnimal(
-          "Lion",
-          AnimalSpecies.LION,
-          AnimalClass.MAMMAL,
-          12,
-          190,
-          true
-      ),
-      new SafariAnimal(
-          "Elephant",
-          AnimalSpecies.ELEPHANT,
-          AnimalClass.MAMMAL,
-          25,
-          6000,
-          false
-      ),
-      new SafariAnimal(
-          "Crocodile",
-          AnimalSpecies.CROCODILE,
-          AnimalClass.REPTILE,
-          40,
-          500,
-          true
-      ),
-      new SafariAnimal(
-          "Lizard",
-          AnimalSpecies.LIZARD,
-          AnimalClass.REPTILE,
-          2,
-          3,
-          false
-      )
-  );
 }
