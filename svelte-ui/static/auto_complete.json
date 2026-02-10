@@ -21,7 +21,6 @@
     ".max()",
     ".min()",
     ".reduce()",
-    ".forEach()",
     ".toArray()",
     ".comparing(",
     ".groupingBy(",

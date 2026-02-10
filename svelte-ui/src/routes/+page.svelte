@@ -50,20 +50,19 @@
                         </svg>
                     </div>
                     <h2 class="text-xl font-semibold mb-3 text-gray-800">{riddle.description}</h2>
-                    <!--{#if riddle.dataType === 'mvp.streamy.models.SafariAnimal'}-->
-                    <!--    {#each riddle.input as animal}-->
-                    <!--        <p>{animal.name}</p>-->
-                    <!--    {/each}-->
-
-                    <!--{:else}-->
-                    <!--    <div class="text-sm text-gray-600">-->
-                    <!--        <p class="mb-1">Input: [{riddle.input.join(', ')}]</p>-->
-                    <!--        <p>Output: [{riddle.expectedOutput.join(', ')}]</p>-->
-                    <!--    </div>-->
-                    <!--{/if}-->
-
                 </a>
             {/each}
         </div>
     {/if}
 </div>
+
+<style>
+  :global(body) {
+    background-image: url('../lib/assets/safari-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;  /* Keeps background fixed while scrolling */
+    margin: 0;
+  }
+</style>

@@ -86,7 +86,7 @@ public class StreamPipelineEngineServiceV2 {
                 );
         for (String token : forbidden) {
             if (pipeline.contains(token)) {
-                throw new IllegalArgumentException(
+                throw new UnsupportedOperationException(
                         "Forbidden construct detected: " + token
                 );
             }

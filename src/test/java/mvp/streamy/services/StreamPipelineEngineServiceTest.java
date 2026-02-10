@@ -188,6 +188,7 @@ class StreamPipelineEngineServiceTest {
         }))
         """;
 
+
     Object rawResult =
         engine.execute(
             riddle.input(),
