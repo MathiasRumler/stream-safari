@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Riddle } from '$lib/types';
+  import { onMount } from 'svelte';
 
   let { data } = $props();
   let riddle = $state<Riddle | null>(null);
@@ -7,6 +8,34 @@
   let error = $state<string | null>(null);
   let pipeline = $state('');
   let submitting = $state(false);
+
+  // Autocomplete state
+  let showAutocomplete = $state(false);
+  let autocompleteOptions = $state<string[]>([]);
+  let selectedIndex = $state(0);
+  let inputElement: HTMLInputElement;
+
+  // Stream methods loaded from file
+  let streamMethods = $state<string[]>([]);
+
+  // Load autocomplete suggestions from file on mount
+  onMount(async () => {
+    try {
+      const response = await fetch('/auto_complete.json');
+      const data = await response.json();
+      streamMethods = data.streamMethods;
+    } catch (err) {
+      console.error('Failed to load autocomplete suggestions:', err);
+      // Fallback to default methods
+      streamMethods = [
+        '.stream()',
+        '.filter()',
+        '.map()',
+        '.collect()',
+        '.toList()',
+      ];
+    }
+  });
 
   // Result state updated to handle RiddleResult fields
   let result = $state<{
@@ -54,6 +83,7 @@
 
     submitting = true;
     result = null;
+    showAutocomplete = false;
 
     try {
       const response = await fetch('http://localhost:8080/api/stream/submit', {
@@ -85,10 +115,111 @@
     }
   }
 
-  function handleKeyPress(event: KeyboardEvent) {
-    if (event.key === 'Enter' && !submitting) {
-      submitSolution();
+  function handleInput(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const value = target.value;
+    const cursorPos = target.selectionStart || 0;
+
+    // Find the last dot or space before the cursor
+    const textBeforeCursor = value.substring(0, cursorPos);
+    const lastDotIndex = textBeforeCursor.lastIndexOf('.');
+    const lastSpaceIndex = textBeforeCursor.lastIndexOf(' ');
+
+    // The start of our current "word" is the character after the last dot or space
+    const lastSeparatorIndex = Math.max(lastDotIndex, lastSpaceIndex);
+
+    // If a dot was the last separator, include it in the search (e.g., ".str")
+    // Otherwise, take the word as is (e.g., "Saf")
+    const searchTerm = lastDotIndex >= lastSpaceIndex
+        ? textBeforeCursor.substring(lastDotIndex)
+        : textBeforeCursor.substring(lastSpaceIndex + 1);
+
+    if (searchTerm.length > 0) {
+      const filtered = streamMethods.filter(method =>
+          method.toLowerCase().startsWith(searchTerm.toLowerCase())
+      );
+
+      if (filtered.length > 0) {
+        autocompleteOptions = filtered;
+        showAutocomplete = true;
+        selectedIndex = 0;
+      } else {
+        showAutocomplete = false;
+      }
+    } else {
+      showAutocomplete = false;
     }
+  }
+
+  function handleKeyDown(event: KeyboardEvent) {
+    if (!showAutocomplete) {
+      if (event.key === 'Enter' && !submitting) {
+        submitSolution();
+      }
+      return;
+    }
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        selectedIndex = (selectedIndex + 1) % autocompleteOptions.length;
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        selectedIndex = selectedIndex === 0 ? autocompleteOptions.length - 1 : selectedIndex - 1;
+        break;
+      case 'Enter':
+      case 'Tab':
+        event.preventDefault();
+        selectAutocomplete(autocompleteOptions[selectedIndex]);
+        break;
+      case 'Escape':
+        event.preventDefault();
+        showAutocomplete = false;
+        break;
+    }
+  }
+
+  function selectAutocomplete(method: string) {
+    const cursorPos = inputElement.selectionStart || 0;
+    const textBeforeCursor = pipeline.substring(0, cursorPos);
+
+    const lastDotIndex = textBeforeCursor.lastIndexOf('.');
+    const lastSpaceIndex = textBeforeCursor.lastIndexOf(' ');
+
+    // Determine where the current word started
+    let replaceFromIndex: number;
+
+    if (method.startsWith('.')) {
+      // If we're inserting a method like ".stream()", find the last dot
+      replaceFromIndex = lastDotIndex !== -1 ? lastDotIndex : cursorPos;
+    } else {
+      // If we're inserting a class like "SafariAnimal", replace from the last space or dot
+      replaceFromIndex = Math.max(lastDotIndex, lastSpaceIndex + 1);
+      if (replaceFromIndex === 0 && lastDotIndex === -1 && lastSpaceIndex === -1) {
+        replaceFromIndex = 0;
+      }
+    }
+
+    const before = pipeline.substring(0, Math.max(0, replaceFromIndex));
+    const after = pipeline.substring(cursorPos);
+
+    pipeline = before + method + after;
+
+    setTimeout(() => {
+      const newPos = before.length + method.length;
+      inputElement.setSelectionRange(newPos, newPos);
+      inputElement.focus();
+    }, 0);
+
+    showAutocomplete = false;
+  }
+
+  function handleBlur() {
+    // Delay to allow click on autocomplete item
+    setTimeout(() => {
+      showAutocomplete = false;
+    }, 200);
   }
 </script>
 
@@ -138,15 +269,35 @@
 
       <div class="mt-8">
         <h2 class="text-lg font-semibold mb-3 text-gray-700">Your Solution:</h2>
-        <div class="flex gap-2">
-          <input
-              type="text"
-              bind:value={pipeline}
-              onkeypress={handleKeyPress}
-              placeholder=".stream()..."
-              class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 font-mono"
-              disabled={submitting}
-          />
+        <div class="flex gap-2 relative">
+          <div class="flex-1 relative">
+            <input
+                bind:this={inputElement}
+                type="text"
+                bind:value={pipeline}
+                oninput={handleInput}
+                onkeydown={handleKeyDown}
+                onblur={handleBlur}
+                placeholder=".stream()..."
+                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 font-mono"
+                disabled={submitting}
+            />
+
+            {#if showAutocomplete && autocompleteOptions.length > 0}
+              <div class="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
+                {#each autocompleteOptions as option, index}
+                  <button
+                      type="button"
+                      onclick={() => selectAutocomplete(option)}
+                      class="w-full text-left px-4 py-2 font-mono text-sm hover:bg-blue-50 {index === selectedIndex ? 'bg-blue-100' : ''}"
+                  >
+                    {option}
+                  </button>
+                {/each}
+              </div>
+            {/if}
+          </div>
+
           <button
               onclick={submitSolution}
               disabled={submitting || !pipeline.trim()}
@@ -155,6 +306,7 @@
             {submitting ? 'Submitting...' : 'Submit'}
           </button>
         </div>
+        <p class="text-xs text-gray-500 mt-2">💡 Type a dot (.) to see autocomplete suggestions</p>
       </div>
 
       {#if result}

@@ -112,7 +112,7 @@ class StreamPipelineEngineServiceTest {
         .filter(SafariAnimal::predator)
         .toList()
         """;
-
+  riddle.input().stream().filter(SafariAnimal::predator);
     Object rawResult =
         engine.execute(riddle.input(), pipeline, SafariAnimal.class);
 

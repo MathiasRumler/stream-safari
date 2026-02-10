@@ -1,0 +1,1 @@
+["filter", "map", "flatMap", "distinct", "sorted", "peek", "limit", "skip", "collect", "reduce", "count", "anyMatch", "allMatch", "noneMatch", "findFirst", "findAny"]
