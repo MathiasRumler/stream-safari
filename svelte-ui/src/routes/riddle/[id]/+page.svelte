@@ -17,6 +17,8 @@
 
   // Stream methods loaded from file
   let streamMethods = $state<string[]>([]);
+  let objectmethods = $state<string[]>([]);
+  let parameterMethods = $state<string[]>([]);
 
   // Load autocomplete suggestions from file on mount
   onMount(async () => {
@@ -24,6 +26,8 @@
       const response = await fetch('/auto_complete.json');
       const data = await response.json();
       streamMethods = data.streamMethods;
+      objectmethods = data.objectMethods;
+      parameterMethods = data.parameterMethods;
     } catch (err) {
       console.error('Failed to load autocomplete suggestions:', err);
       // Fallback to default methods
@@ -115,27 +119,55 @@
     }
   }
 
+
+  const constantList = ['value', 'map', 'filter', 'reduce', 'toString'];
+  //const parameterSuggestions = ['x', 'item', 'index', 'array', 'accumulator', 'currentValue'];
+  const staticMethodSuggestions = ['of', 'empty', 'concat', 'range', 'fromArray', 'generate'];
+
   function handleInput(event: Event) {
     const target = event.target as HTMLInputElement;
     const value = target.value;
     const cursorPos = target.selectionStart || 0;
 
-    // Find the last dot or space before the cursor
     const textBeforeCursor = value.substring(0, cursorPos);
+    console.log(textBeforeCursor);
+
     const lastDotIndex = textBeforeCursor.lastIndexOf('.');
     const lastSpaceIndex = textBeforeCursor.lastIndexOf(' ');
+    const lastParenIndex = textBeforeCursor.lastIndexOf('(');
+    const lastDoubleColonIndex = textBeforeCursor.lastIndexOf('::');
 
-    // The start of our current "word" is the character after the last dot or space
-    const lastSeparatorIndex = Math.max(lastDotIndex, lastSpaceIndex);
+    // Find which separator is closest to the cursor
+    const lastSeparatorIndex = Math.max(lastDotIndex, lastSpaceIndex, lastParenIndex, lastDoubleColonIndex);
 
-    // If a dot was the last separator, include it in the search (e.g., ".str")
-    // Otherwise, take the word as is (e.g., "Saf")
-    const searchTerm = lastDotIndex >= lastSpaceIndex
-        ? textBeforeCursor.substring(lastDotIndex)
-        : textBeforeCursor.substring(lastSpaceIndex + 1);
+    let searchTerm = '';
+    let suggestionList: string[] = streamMethods;
+    let showAllSuggestions = false;
 
-    if (searchTerm.length > 0) {
-      const filtered = streamMethods.filter(method =>
+    // Determine context based on which separator was last
+    if (lastDoubleColonIndex === lastSeparatorIndex && lastDoubleColonIndex !== -1) {
+      // After "::" - show static method suggestions
+      searchTerm = textBeforeCursor.substring(lastDoubleColonIndex + 2);
+      suggestionList = objectmethods;
+      showAllSuggestions = true;
+    } else if (lastParenIndex === lastSeparatorIndex && lastParenIndex !== -1) {
+      // After "(" - show parameter suggestions
+      searchTerm = textBeforeCursor.substring(lastParenIndex + 1);
+      suggestionList = parameterMethods;
+      showAllSuggestions = true;
+    } else if (lastDotIndex >= lastSpaceIndex) {
+      // After "." - show methods (original behavior)
+      searchTerm = textBeforeCursor.substring(lastDotIndex);
+      suggestionList = streamMethods;
+    } else {
+      // After space or start - original behavior
+      searchTerm = textBeforeCursor.substring(lastSpaceIndex + 1);
+      suggestionList = streamMethods;
+    }
+
+    // Show all suggestions after "(" or "::" or filter by search term
+    if (searchTerm.length > 0 || showAllSuggestions) {
+      const filtered = suggestionList.filter(method =>
           method.toLowerCase().startsWith(searchTerm.toLowerCase())
       );
 
@@ -151,6 +183,67 @@
     }
   }
 
+  function selectAutocomplete(method: string) {
+    const cursorPos = inputElement.selectionStart || 0;
+    const textBeforeCursor = pipeline.substring(0, cursorPos);
+
+    const lastDotIndex = textBeforeCursor.lastIndexOf('.');
+    const lastSpaceIndex = textBeforeCursor.lastIndexOf(' ');
+    const lastParenIndex = textBeforeCursor.lastIndexOf('(');
+    const lastDoubleColonIndex = textBeforeCursor.lastIndexOf('::');
+
+    const lastSeparatorIndex = Math.max(lastDotIndex, lastSpaceIndex, lastParenIndex, lastDoubleColonIndex);
+
+    let replaceFromIndex: number;
+
+    if (lastDoubleColonIndex === lastSeparatorIndex && lastDoubleColonIndex !== -1) {
+      // After "::" - replace from after the double colon
+      replaceFromIndex = lastDoubleColonIndex + 2;
+    } else if (lastParenIndex === lastSeparatorIndex && lastParenIndex !== -1) {
+      // After "(" - replace from after the paren
+      replaceFromIndex = lastParenIndex + 1;
+    } else if (method.startsWith('.')) {
+      // If we're inserting a method like ".stream()", find the last dot
+      replaceFromIndex = lastDotIndex !== -1 ? lastDotIndex : cursorPos;
+    } else {
+      // Original behavior for classes/words
+      replaceFromIndex = Math.max(lastDotIndex, lastSpaceIndex + 1);
+      if (replaceFromIndex === 0 && lastDotIndex === -1 && lastSpaceIndex === -1) {
+        replaceFromIndex = 0;
+      }
+    }
+
+    const before = pipeline.substring(0, Math.max(0, replaceFromIndex));
+    const after = pipeline.substring(cursorPos);
+
+    pipeline = before + method + after;
+
+    // If the completed method ends with "(" or "::", show appropriate suggestions
+    const endsWithParen = method.endsWith('(');
+    const endsWithDoubleColon = method.endsWith('::');
+
+    setTimeout(() => {
+      const newPos = before.length + method.length;
+      inputElement.setSelectionRange(newPos, newPos);
+      inputElement.focus();
+
+      // Show all parameter suggestions after autocompleting a method with "("
+      if (endsWithParen) {
+        autocompleteOptions = parameterMethods;
+        showAutocomplete = true;
+        selectedIndex = 0;
+      } else if (endsWithDoubleColon) {
+        // Show all static method suggestions after autocompleting with "::"
+        autocompleteOptions = objectmethods;
+        showAutocomplete = true;
+        selectedIndex = 0;
+      }
+    }, 0);
+
+    if (!endsWithParen && !endsWithDoubleColon) {
+      showAutocomplete = false;
+    }
+  }
   function handleKeyDown(event: KeyboardEvent) {
     if (!showAutocomplete) {
       if (event.key === 'Enter' && !submitting) {
@@ -180,46 +273,24 @@
     }
   }
 
-  function selectAutocomplete(method: string) {
-    const cursorPos = inputElement.selectionStart || 0;
-    const textBeforeCursor = pipeline.substring(0, cursorPos);
-
-    const lastDotIndex = textBeforeCursor.lastIndexOf('.');
-    const lastSpaceIndex = textBeforeCursor.lastIndexOf(' ');
-
-    // Determine where the current word started
-    let replaceFromIndex: number;
-
-    if (method.startsWith('.')) {
-      // If we're inserting a method like ".stream()", find the last dot
-      replaceFromIndex = lastDotIndex !== -1 ? lastDotIndex : cursorPos;
-    } else {
-      // If we're inserting a class like "SafariAnimal", replace from the last space or dot
-      replaceFromIndex = Math.max(lastDotIndex, lastSpaceIndex + 1);
-      if (replaceFromIndex === 0 && lastDotIndex === -1 && lastSpaceIndex === -1) {
-        replaceFromIndex = 0;
-      }
-    }
-
-    const before = pipeline.substring(0, Math.max(0, replaceFromIndex));
-    const after = pipeline.substring(cursorPos);
-
-    pipeline = before + method + after;
-
-    setTimeout(() => {
-      const newPos = before.length + method.length;
-      inputElement.setSelectionRange(newPos, newPos);
-      inputElement.focus();
-    }, 0);
-
-    showAutocomplete = false;
-  }
-
   function handleBlur() {
     // Delay to allow click on autocomplete item
     setTimeout(() => {
       showAutocomplete = false;
     }, 200);
+  }
+
+  function handleInputWithResize(event: Event) {
+    const target = event.target as HTMLTextAreaElement;
+
+    // Reset height to auto to get the correct scrollHeight
+    target.style.height = 'auto';
+
+    // Set height based on scrollHeight
+    target.style.height = target.scrollHeight + 'px';
+
+    // Call your original handleInput function
+    handleInput(event);
   }
 </script>
 
@@ -271,17 +342,17 @@
         <h2 class="text-lg font-semibold mb-3 text-gray-700">Your Solution:</h2>
         <div class="flex gap-2 relative">
           <div class="flex-1 relative">
-            <input
-                bind:this={inputElement}
-                type="text"
-                bind:value={pipeline}
-                oninput={handleInput}
-                onkeydown={handleKeyDown}
-                onblur={handleBlur}
-                placeholder=".stream()..."
-                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 font-mono"
-                disabled={submitting}
-            />
+      <textarea
+          bind:this={inputElement}
+          bind:value={pipeline}
+          oninput={handleInputWithResize}
+          onkeydown={handleKeyDown}
+          onblur={handleBlur}
+          placeholder=".stream()..."
+          rows="1"
+          class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 font-mono resize-none overflow-hidden"
+          disabled={submitting}
+      ></textarea>
 
             {#if showAutocomplete && autocompleteOptions.length > 0}
               <div class="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
@@ -297,6 +368,8 @@
               </div>
             {/if}
           </div>
+
+
 
           <button
               onclick={submitSolution}

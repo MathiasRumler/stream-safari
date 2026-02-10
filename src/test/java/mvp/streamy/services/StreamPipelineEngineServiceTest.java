@@ -30,14 +30,37 @@ class StreamPipelineEngineServiceTest {
         .sorted(Comparator.comparing(SafariAnimal::age))
         .toList()
         """;
-
+   String pipeline2 = """
+        .sorted()
+        .toList()
+        """;
+    String pipeline3 = """
+        .sorted(SafariAnimal.BY_WEIGHT)
+        .toList()
+        """;
     Object rawResult =
         engine.execute(riddle.input(), pipeline, SafariAnimal.class);
+
+    Object rawResult2 =
+        engine.execute(riddle.input(), pipeline2, SafariAnimal.class);
+
+    Object rawResult3 =
+        engine.execute(riddle.input(), pipeline3, SafariAnimal.class);
 
     ResultValue actual =
         ResultValueFactory.from(rawResult);
 
+    ResultValue actual2 =
+        ResultValueFactory.from(rawResult2);
+
+    ResultValue actual3 =
+        ResultValueFactory.from(rawResult3);
+
     assertEquals(riddle.expectedOutput(), actual.value());
+    assertEquals(riddle.expectedOutput(), actual2.value());
+    assertEquals(riddle.expectedOutput(), actual3.value());
+
+
   }
 
   @Test

@@ -2,7 +2,8 @@
   "streamMethods": [
     ".stream()",
     ".filter(",
-    ".map()",
+    ".map(",
+    ".mapToInt(",
     ".flatMap()",
     ".sorted()",
     ".distinct()",
@@ -22,8 +23,9 @@
     ".reduce()",
     ".forEach()",
     ".toArray()",
-    ".groupingBy()",
-    ".partitioningBy()",
+    ".comparing(",
+    ".groupingBy(",
+    ".partitioningBy(",
     ".joining()",
     ".sum()",
     ".average()",
@@ -36,8 +38,21 @@
     ".animalClass()",
     ".age()",
     ".weight()",
-    "SafariAnimal",
-    "SafariAnimal::"
+    ".orElseThrow()"
 
+  ],"objectMethods": [
+  "predator",
+  "name",
+  "species",
+  "animalClass",
+  "age",
+  "weight"
+],
+  "parameterMethods" :
+  [
+    "SafariAnimal",
+    "SafariAnimal::",
+    "Collectors",
+    "Comparator"
   ]
 }
