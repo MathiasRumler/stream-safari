@@ -37,6 +37,10 @@
     ".animalClass()",
     ".age()",
     ".weight()",
+    ".BY_AGE",
+    ".BY_WEIGHT",
+    ".BY_NAME",
+    ".PREDATORS_FIRST",
     ".orElseThrow()"
 
   ],"objectMethods": [

@@ -40,3 +40,6 @@ zsh:
 - https://developer.ibm.com/series/java-streams/
 - https://www.baeldung.com/java-streams
 - https://medium.com/@AlexanderObregon/javas-collectors-groupingby-method-explained-a5be61c80e0e
+
+### Ux inspiration
+https://sql-island.informatik.uni-kl.de/

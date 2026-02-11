@@ -22,7 +22,7 @@ public final class SafariScenarios {
       new SafariAnimal("Zembet the Zebra", AnimalSpecies.ZEBRA, AnimalClass.MAMMAL, 10, 300, false),
       new SafariAnimal("Leo the Lion", AnimalSpecies.LION, AnimalClass.MAMMAL, 12, 190, true),
       new SafariAnimal("Gigi the Giraffe", AnimalSpecies.GIRAFFE, AnimalClass.MAMMAL, 15, 800, false),
-      new SafariAnimal("Ello the Elephant", AnimalSpecies.ELEPHANT, AnimalClass.MAMMAL, 25, 6000, false),
+      new SafariAnimal("Ello the Elephant", AnimalSpecies.ELEPHANT, AnimalClass.MAMMAL, 45, 6000, false),
 
       new SafariAnimal("Hakka the Hyena", AnimalSpecies.HYENA, AnimalClass.MAMMAL, 6, 55, true),
       new SafariAnimal("Zuri the Zebra", AnimalSpecies.ZEBRA, AnimalClass.MAMMAL, 7, 280, false),
