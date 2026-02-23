@@ -3,7 +3,13 @@
   import { onMount } from 'svelte';
 
   // Props
-  let { riddle = $bindable() }: { riddle: Riddle | null } = $props();
+  let {
+    riddle = $bindable(),
+    isStory = false
+  }: {
+    riddle: Riddle | null,
+    isStory?: boolean
+  } = $props();
 
   // State
   let pipeline = $state('');

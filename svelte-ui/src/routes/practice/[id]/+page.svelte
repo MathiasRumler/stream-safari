@@ -41,6 +41,6 @@
   {:else if error}
     <div class="text-center text-red-500">Error: {error}</div>
   {:else}
-    <Riddlechallenge bind:riddle />
+    <Riddlechallenge bind:riddle isStory={false} />
   {/if}
 </div>
