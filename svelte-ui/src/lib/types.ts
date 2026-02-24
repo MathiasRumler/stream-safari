@@ -30,3 +30,17 @@ export interface RiddleResult {
   message: string;
   exception?: string;
 }
+
+export interface StorySlide {
+  title: string;
+  content: string; // Markdown or HTML
+  codeSnippet?: string;
+}
+
+export interface StoryLevel {
+  id: string;
+  title: string;
+  description: string;
+  slides: StorySlide[];
+  riddleId: string;
+}

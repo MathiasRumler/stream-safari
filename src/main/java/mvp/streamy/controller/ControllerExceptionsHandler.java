@@ -16,10 +16,17 @@ public class ControllerExceptionsHandler {
     public ResponseEntity<CustomErrorResponse> handleDisabledException(IllegalArgumentException e) {
         return generateErrorResponse(HttpStatus.BAD_REQUEST, IllegalArgumentException.class.getSimpleName(), e);
     }
+
     @ExceptionHandler(UnsupportedOperationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<CustomErrorResponse> handleUnsupportedOperationException(UnsupportedOperationException e) {
         return generateErrorResponse(HttpStatus.BAD_REQUEST, UnsupportedOperationException.class.getSimpleName(), e);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<CustomErrorResponse> handleRuntimeException(RuntimeException e) {
+        return generateErrorResponse(HttpStatus.BAD_REQUEST, RuntimeException.class.getSimpleName(), e);
     }
 
     private ResponseEntity<CustomErrorResponse> generateErrorResponse(HttpStatus httpStatus, String exceptionName, Exception e) {
@@ -28,12 +35,4 @@ public class ControllerExceptionsHandler {
 
         return ResponseEntity.status(httpStatus).body(new CustomErrorResponse( exceptionName, stackTrace));
     }
-
-//    private ResponseEntity<CustomErrorResponse> generateErrorResponse(HttpStatus httpStatus, String exceptionName,
-//                                                                      String customErrorMessaage) {
-//        if (log.isDebugEnabled()) {
-//            log.error("There was an {} during runtime. Errormessage: {}", exceptionName, customErrorMessaage);
-//        }
-//        return ResponseEntity.status(httpStatus).body(new CustomErrorResponse( exceptionName, customErrorMessaage));
-//    }
 }

@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.*;
+import java.util.concurrent.*;
 
 @Service
 @Slf4j
@@ -53,11 +54,23 @@ public class StreamPipelineEngineServiceV2 {
             Method runMethod =
                     programClass.getMethod("run", List.class);
 
-            @SuppressWarnings("unchecked")
-            Object output =
-                     runMethod.invoke(null, input);
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future<Object> future = executor.submit(() -> {
+                try {
+                    return runMethod.invoke(null, input);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
 
-            return output;
+            try {
+                return future.get(5, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                future.cancel(true);
+                throw new RuntimeException("Execution timed out! Possible infinite loop detected.");
+            } finally {
+                executor.shutdownNow();
+            }
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -82,7 +95,12 @@ public class StreamPipelineEngineServiceV2 {
                         "new ",
                         "System",
                         "Runtime",
-                        "Thread"
+                        "Thread",
+                        "while",
+                        "for",
+                        "do",
+                        "exec",
+                        "ProcessBuilder"
                 );
         for (String token : forbidden) {
             if (pipeline.contains(token)) {

@@ -1,11 +1,10 @@
 package mvp.streamy.services;
 
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import org.junit.jupiter.api.Test;
 
 public class StreamPipelineEngineServiceAbuseTest {
 
@@ -47,15 +46,39 @@ public class StreamPipelineEngineServiceAbuseTest {
                 .peek(System.out::println)
                 """;
 
-        IllegalArgumentException exception =
+        UnsupportedOperationException exception =
                 assertThrows(
-                        IllegalArgumentException.class,
+                        UnsupportedOperationException.class,
                         () -> engine2.execute(input, invalidPipeline, Integer.class)
                 );
 
         assertTrue(
                 exception.getMessage().contains("Forbidden construct"),
                 "Expected validation error for forbidden pipeline"
+        );
+    }
+
+    @Test
+    void shouldTimeoutOnInfiniteLoop() {
+        List<Integer> input = List.of(1);
+
+        // This pipeline creates an infinite stream and tries to count it.
+        // count() will run forever without allocating memory, allowing the timeout to trigger.
+        String infinitePipeline =
+                """
+                .flatMap(x -> java.util.stream.Stream.generate(() -> 1))
+                .count()
+                """;
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> engine2.execute(input, infinitePipeline, Integer.class)
+                );
+
+        assertTrue(
+                exception.getMessage().contains("Execution timed out"),
+                "Expected timeout error for infinite loop"
         );
     }
 }
