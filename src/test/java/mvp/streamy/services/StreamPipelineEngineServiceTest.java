@@ -3,6 +3,7 @@ package mvp.streamy.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import tools.jackson.databind.ObjectMapper;
 import mvp.streamy.Repository.RiddleRepository;
 import mvp.streamy.models.ResultValue;
 import mvp.streamy.models.Riddle;
@@ -19,7 +20,8 @@ class StreamPipelineEngineServiceTest {
   @BeforeEach
   void setup() {
     engine = new StreamPipelineEngineServiceV2();
-    riddleRepository = new RiddleRepository();
+    riddleRepository = new RiddleRepository(new ObjectMapper(), engine);
+    riddleRepository.init();
   }
 
   @Test

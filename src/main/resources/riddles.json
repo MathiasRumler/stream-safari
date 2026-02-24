@@ -1,0 +1,44 @@
+[
+  {
+    "id": "1",
+    "description": "Order animals by age (youngest first)",
+    "dataset": "BASE_ANIMALS",
+    "solution": ".sorted(Comparator.comparing(SafariAnimal::age)).toList()"
+  },
+  {
+    "id": "2",
+    "description": "Remove duplicate animals",
+    "dataset": "WITH_DUPLICATES",
+    "solution": ".distinct().toList()"
+  },
+  {
+    "id": "4",
+    "description": "Find the heaviest animal",
+    "dataset": "BASE_ANIMALS",
+    "solution": ".max(Comparator.comparing(SafariAnimal::weight)).orElseThrow()"
+  },
+  {
+    "id": "5",
+    "description": "Get the weight of all animals combined",
+    "dataset": "BASE_ANIMALS",
+    "solution": ".mapToInt(SafariAnimal::weight).sum()"
+  },
+  {
+    "id": "6",
+    "description": "Find all predators",
+    "dataset": "BASE_ANIMALS",
+    "solution": ".filter(SafariAnimal::predator).toList()"
+  },
+  {
+    "id": "7",
+    "description": "Find the heaviest animal per species",
+    "dataset": "BASE_ANIMALS",
+    "solution": ".collect(Collectors.groupingBy(SafariAnimal::species, Collectors.collectingAndThen(Collectors.maxBy(Comparator.comparing(SafariAnimal::weight)), Optional::get)))"
+  },
+  {
+    "id": "8",
+    "description": "Group animals into weight ranges: 0-200, 200-500, 500-1000, 1000+",
+    "dataset": "BASE_ANIMALS",
+    "solution": ".collect(Collectors.groupingBy(a -> { int w = a.weight(); if (w <= 200) return \"0-200\"; if (w <= 500) return \"200-500\"; if (w <= 1000) return \"500-1000\"; return \"1000+\"; }))"
+  }
+]
