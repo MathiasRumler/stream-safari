@@ -35,7 +35,7 @@ class StreamPipelineEngineServiceTest {
         .toList()
         """;
     String pipeline3 = """
-        .sorted(SafariAnimal.BY_WEIGHT)
+        .sorted(SafariAnimal.BY_AGE)
         .toList()
         """;
     Object rawResult =

@@ -9,13 +9,17 @@
   let riddle = $state<Riddle | null>(null);
   let loadingRiddle = $state(false);
   let error = $state<string | null>(null);
+  let riddleSolved = $state(false);
 
   // Reset state when level changes
   $effect(() => {
+    // We access level.id here to ensure the effect re-runs when the level changes
+    const _ = level.id;
     currentSlideIndex = 0;
     showRiddle = false;
     riddle = null;
     error = null;
+    riddleSolved = false;
   });
 
   async function fetchRiddle(id: string) {
@@ -49,10 +53,7 @@
   }
 
   function handleRiddleSuccess() {
-    // You might want to show a success message or animation here before moving on
-    setTimeout(() => {
-      onLevelComplete();
-    }, 1500);
+    riddleSolved = true;
   }
 </script>
 
@@ -138,17 +139,18 @@
           <span class="block sm:inline"> {error}</span>
         </div>
       {:else if riddle}
-        <!-- We need to modify Riddlechallenge to accept an onSuccess callback -->
-        <!-- For now, we can assume success if the result is correct, but Riddlechallenge handles its own state -->
-        <!-- Ideally, Riddlechallenge should emit an event on success -->
-        <Riddlechallenge bind:riddle isStory={true} />
+        {#key riddle.id}
+          <Riddlechallenge bind:riddle isStory={true} onSuccess={handleRiddleSuccess} />
+        {/key}
 
-        <!-- Temporary "Next Level" button for simulation until we wire up the success callback properly -->
-        <!-- In a real implementation, Riddlechallenge would expose an event or prop for success -->
         <div class="mt-8 flex justify-end">
            <button
               onclick={onLevelComplete}
-              class="px-6 py-3 bg-green-600 text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition-all transform hover:scale-105 flex items-center gap-2"
+              disabled={!riddleSolved}
+              class="px-6 py-3 font-bold rounded-lg shadow-lg transition-all transform flex items-center gap-2
+                     {riddleSolved
+                       ? 'bg-green-600 text-white hover:bg-green-700 hover:scale-105 cursor-pointer'
+                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'}"
            >
              Next Level →
            </button>
