@@ -18,6 +18,7 @@
   // State
   let pipeline = $state('');
   let submitting = $state(false);
+  let showInfo = $state(false);
 
   // Autocomplete state
   let showAutocomplete = $state(false);
@@ -29,17 +30,26 @@
   let streamMethods = $state<string[]>([]);
   let objectMethods = $state<string[]>([]);
   let parameterMethods = $state<string[]>([]);
+  let safariAnimalClassDef = $state('');
 
-  // Load autocomplete suggestions from file on mount
+  // Load autocomplete suggestions and class definitions from file on mount
   onMount(async () => {
     try {
-      const response = await fetch('/auto_complete.json');
-      const data = await response.json();
-      streamMethods = data.streamMethods;
-      objectMethods = data.objectMethods;
-      parameterMethods = data.parameterMethods;
+      const [autoCompleteRes, classDefRes] = await Promise.all([
+        fetch('/auto_complete.json'),
+        fetch('/class_definitions.json')
+      ]);
+
+      const autoCompleteData = await autoCompleteRes.json();
+      streamMethods = autoCompleteData.streamMethods;
+      objectMethods = autoCompleteData.objectMethods;
+      parameterMethods = autoCompleteData.parameterMethods;
+
+      const classDefData = await classDefRes.json();
+      safariAnimalClassDef = classDefData.SafariAnimal;
+
     } catch (err) {
-      console.error('Failed to load autocomplete suggestions:', err);
+      console.error('Failed to load resources:', err);
       // Fallback to default methods
       streamMethods = [
         '.stream()',
@@ -204,12 +214,24 @@
 </script>
 
 {#if riddle}
-  <div class="bg-white border-2 border-gray-200 rounded-lg shadow-lg p-8">
-    <div class="mb-4">
-      <span class="text-sm font-semibold text-blue-600">Riddle #{riddle.id}</span>
-    </div>
+  <div class="bg-white border-2 border-gray-200 rounded-lg shadow-lg p-8 relative">
+    <button
+        onclick={() => showInfo = true}
+        class="absolute top-4 right-4 text-gray-400 hover:text-blue-600 transition-colors"
+        title="View SafariAnimal Class"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    </button>
 
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">{riddle.description}</h1>
+    {#if !isStory}
+      <div class="mb-4">
+        <span class="text-sm font-semibold text-blue-600">Riddle #{riddle.id}</span>
+      </div>
+    {/if}
+
+    <h1 class="text-3xl font-bold mb-6 text-gray-800 pr-8">{riddle.description}</h1>
 
     <div class="bg-gray-50 p-6 rounded-xl border-2 border-dashed border-gray-300 mb-8">
       <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Input Data:</h2>
@@ -281,4 +303,22 @@
       <RiddleResultDisplay result={result} />
     {/if}
   </div>
+
+  {#if showInfo}
+    <div class="fixed inset-0 bg-gray-900/30 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+      <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="flex justify-between items-center p-6 border-b border-gray-200">
+          <h3 class="text-xl font-bold text-gray-800">SafariAnimal.java</h3>
+          <button onclick={() => showInfo = false} class="text-gray-500 hover:text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="p-6 overflow-y-auto bg-gray-50">
+          <pre class="text-sm font-mono text-gray-800 whitespace-pre-wrap"><code>{safariAnimalClassDef}</code></pre>
+        </div>
+      </div>
+    </div>
+  {/if}
 {/if}

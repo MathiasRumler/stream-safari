@@ -14,12 +14,12 @@ export const storyLevels: StoryLevel[] = [
       {
         title: 'Sorting with Streams',
         content: 'The `.sorted()` method allows you to sort elements in a stream. By default, it sorts in natural order, but for objects like Animals, you need a `Comparator`.',
-        codeSnippet: 'List<String> names = Arrays.asList("Charlie", "Alice", "Bob");\nnames.stream()\n  .sorted()\n  .collect(Collectors.toList()); // [Alice, Bob, Charlie]'
+        codeSnippet: 'stream.sorted().collect(Collectors.toList())'
       },
       {
         title: 'Using Comparators',
         content: 'To sort objects by a specific field, use `Comparator.comparing()`.',
-        codeSnippet: 'animals.stream()\n  .sorted(Comparator.comparing(Animal::getAge))\n  .collect(Collectors.toList());'
+        codeSnippet: 'stream.sorted(Comparator.comparing(Animal::getAge))'
       }
     ]
   },
@@ -36,7 +36,7 @@ export const storyLevels: StoryLevel[] = [
       {
         title: 'The distinct() Operation',
         content: 'The `.distinct()` method returns a stream consisting of the distinct elements (according to Object.equals(Object)) of this stream.',
-        codeSnippet: 'List<Integer> numbers = Arrays.asList(1, 2, 2, 3, 3, 3);\nnumbers.stream()\n  .distinct()\n  .collect(Collectors.toList()); // [1, 2, 3]'
+        codeSnippet: 'stream.distinct().collect(Collectors.toList())'
       }
     ]
   },
@@ -53,12 +53,12 @@ export const storyLevels: StoryLevel[] = [
       {
         title: 'Filtering Streams',
         content: 'The `.filter()` method takes a `Predicate` (a function that returns true or false) and keeps only the elements that match.',
-        codeSnippet: 'animals.stream()\n  .filter(animal -> animal.isPredator())\n  .collect(Collectors.toList());'
+        codeSnippet: 'stream.filter(element -> condition)'
       },
       {
         title: 'Method References',
         content: 'You can make your code cleaner using method references.',
-        codeSnippet: 'animals.stream()\n  .filter(SafariAnimal::isPredator)\n  .collect(Collectors.toList());'
+        codeSnippet: 'stream.filter(ClassName::methodName)'
       }
     ]
   },
@@ -75,7 +75,7 @@ export const storyLevels: StoryLevel[] = [
       {
         title: 'Max and Min',
         content: 'The `.max()` and `.min()` methods return an `Optional` describing the maximum or minimum element of this stream according to a `Comparator`.',
-        codeSnippet: 'animals.stream()\n  .max(Comparator.comparing(SafariAnimal::getWeight))\n  .orElseThrow();'
+        codeSnippet: 'stream.max(Comparator.comparing(Animal::getWeight))'
       }
     ]
   },
@@ -92,7 +92,7 @@ export const storyLevels: StoryLevel[] = [
       {
         title: 'Mapping to Primitives',
         content: 'Streams of objects can be converted to primitive streams (IntStream, DoubleStream, LongStream) using methods like `.mapToDouble()`.',
-        codeSnippet: 'double totalWeight = animals.stream()\n  .mapToDouble(SafariAnimal::getWeight)\n  .sum();'
+        codeSnippet: 'stream.mapToDouble(Animal::getWeight).sum()'
       },
       {
         title: 'The sum() Operation',
@@ -113,12 +113,12 @@ export const storyLevels: StoryLevel[] = [
       {
         title: 'Collectors.groupingBy',
         content: 'The `.collect(Collectors.groupingBy(...))` method allows you to group elements by a classifier function. The result is a Map.',
-        codeSnippet: 'Map<Species, List<Animal>> bySpecies = animals.stream()\n  .collect(Collectors.groupingBy(SafariAnimal::getSpecies));'
+        codeSnippet: 'stream.collect(Collectors.groupingBy(Animal::getSpecies))'
       },
       {
         title: 'Downstream Collectors',
         content: 'You can pass a second collector to `groupingBy` to process the values in each group. `Collectors.collectingAndThen` or `Collectors.maxBy` are useful here.',
-        codeSnippet: 'animals.stream()\n  .collect(Collectors.groupingBy(\n    SafariAnimal::getSpecies,\n    Collectors.collectingAndThen(\n      Collectors.maxBy(Comparator.comparing(SafariAnimal::getWeight)),\n      Optional::get\n    )\n  ));'
+        codeSnippet: 'stream.collect(Collectors.groupingBy(\n  Animal::getSpecies,\n  Collectors.maxBy(Comparator.comparing(Animal::getWeight))\n))'
       }
     ]
   },
@@ -135,7 +135,7 @@ export const storyLevels: StoryLevel[] = [
       {
         title: 'Complex Grouping',
         content: 'The classifier function in `groupingBy` can be any function that returns a key. You can write a lambda that returns a String based on the weight.',
-        codeSnippet: 'animals.stream()\n  .collect(Collectors.groupingBy(animal -> {\n    double w = animal.getWeight();\n    if (w < 200) return "0-200";\n    else if (w < 500) return "200-500";\n    // ...\n    else return "1000+";\n  }));'
+        codeSnippet: 'stream.collect(Collectors.groupingBy(animal -> {\n  if (condition) return "Group A";\n  else return "Group B";\n}))'
       }
     ]
   }
