@@ -1,0 +1,9 @@
+.git
+.gradle
+.idea
+build
+out
+node_modules
+svelte-ui/node_modules
+svelte-ui/.svelte-kit
+*.DS_Store

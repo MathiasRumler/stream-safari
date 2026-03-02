@@ -1,8 +1,3 @@
-
-
-Für Listen mache ich einfach icons für alles andere lege ich einfach ein banner drüber vielleicht kann ich teilweise auch im banner mit icons arbeiten
-
-
 ### Names
 
 •  Java Stream Safari
