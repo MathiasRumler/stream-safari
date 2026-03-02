@@ -3,11 +3,11 @@ package mvp.streamy.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import mvp.streamy.models.SafariAnimal;
 import tools.jackson.databind.ObjectMapper;
 import mvp.streamy.Repository.RiddleRepository;
 import mvp.streamy.models.ResultValue;
 import mvp.streamy.models.Riddle;
-import mvp.streamy.models.SafariAnimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
